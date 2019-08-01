@@ -2,7 +2,7 @@ from keras.models import Model
 from keras.layers import Input, LSTM, Dense
 import numpy as np
 import pandas as pd
-
+import os
 #Batch size 的大小
 batch_size = 32
 # 迭代次数epochs
@@ -96,12 +96,14 @@ model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 
 # 训练
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
-model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
-          batch_size=batch_size,
-          epochs=epochs,
-          validation_split=0.2)
-# 保存模型
-model.save('s2s.h5')
+print(os.path.exists('s2s.h5'))
+if os.path.exists('s2s.h5') == False:
+  model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
+            batch_size=batch_size,
+            epochs=epochs,
+            validation_split=0.2)
+  # 保存模型
+  model.save('s2s.h5')
 
 encoder_model = Model(encoder_inputs, encoder_states)
 
@@ -155,4 +157,9 @@ def predict_ans(question):
       decoded_sentence = decode_sequence(inseq)
       return decoded_sentence
 
-print('Decoded sentence:', predict_ans("挖机履带掉了怎么装上去"))
+reverse_input_char_index = dict(
+    (i, char) for char, i in input_token_index.items())
+reverse_target_char_index = dict(
+    (i, char) for char, i in target_token_index.items())
+
+print('Decoded sentence:', predict_ans("求个正解"))
